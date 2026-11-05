@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ski-Verleih</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">Ski-Verleih</div>
+  <nav class="tabs" role="tablist">
+    <button data-tab="dashboard" class="active">Dashboard</button>
+    <button data-tab="skis">Ski-Verwaltung</button>
+    <button data-tab="persons">Personen</button>
+    <button data-tab="rentals">Reservierungen</button>
+  </nav>
+</header>
+
+<div id="toast" class="toast" hidden></div>
+
+<main>
+  <!-- ================= DASHBOARD ================= -->
+  <section id="tab-dashboard" class="tab active">
+    <div class="card">
+      <h1 class="card-title">Dashboard</h1>
+      <div class="stat-grid">
+        <div class="stat stat-purple"><span class="stat-label">Verfügbare Ski</span><span class="stat-value" id="d-available">–</span></div>
+        <div class="stat stat-pink"><span class="stat-label">Ausgeliehene Ski</span><span class="stat-value" id="d-rented">–</span></div>
+        <div class="stat stat-cyan"><span class="stat-label">Gesamt Ski</span><span class="stat-value" id="d-total">–</span></div>
+        <div class="stat stat-green"><span class="stat-label">Registrierte Personen</span><span class="stat-value" id="d-persons">–</span></div>
+      </div>
+
+      <h3 class="quick-title">Schnellzugriff</h3>
+      <div class="quick">
+        <button class="btn-blue" data-goto="skis">Ski verwalten</button>
+        <button class="btn-blue" data-goto="persons">Personen verwalten</button>
+        <button class="btn-green" data-goto="rentals">Neue Ausleihe</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="mini-stats">
+        <span id="mini-overdue">Überfällig: <strong id="d-overdue">–</strong></span>
+        <span>Reservierungen: <strong id="d-reserved">–</strong></span>
+        <span>Umsatz (abgeschlossen): <strong id="d-revenue">–</strong></span>
+      </p>
+    <div class="grid3">
+      <div class="panel">
+        <h2>Überfällig</h2>
+        <ul class="list" id="d-overdue-list"></ul>
+      </div>
+      <div class="panel">
+        <h2>Heute fällig</h2>
+        <ul class="list" id="d-due-list"></ul>
+      </div>
+      <div class="panel">
+        <h2>Nächste Reservierungen</h2>
+        <ul class="list" id="d-upcoming-list"></ul>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ================= AUSLEIHEN ================= -->
+  <section id="tab-rentals" class="tab">
+    <div class="split">
+      <form id="rental-form" class="panel form">
+        <h2>Neue Ausleihe</h2>
+
+        <label>Person
+          <select name="personId" required></select>
+        </label>
+        <p class="hint">Person nicht dabei? <a href="#" data-goto="persons">Zuerst anlegen</a></p>
+
+        <label>Beginn
+          <div class="row">
+            <input type="datetime-local" name="start" required>
+            <button type="button" id="btn-now">Jetzt</button>
+          </div>
+        </label>
+
+        <div class="chips" id="duration-chips">
+          <span class="hint">Dauer:</span>
+          <button type="button" data-hours="2">2 h</button>
+          <button type="button" data-hours="4">4 h</button>
+          <button type="button" data-hours="24">1 Tag</button>
+          <button type="button" data-hours="72">3 Tage</button>
+          <button type="button" data-hours="168">1 Woche</button>
+        </div>
+
+        <label>Ende
+          <input type="datetime-local" name="end" required>
+        </label>
+
+        <label>Ski <span class="hint" id="ski-count"></span>
+          <select name="skiId" required></select>
+        </label>
+
+        <div class="quote" id="quote">Zeitraum und Ski wählen, um den Preis zu sehen.</div>
+
+        <button class="primary" type="submit">Ausleihe buchen</button>
+      </form>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Alle Ausleihen</h2>
+          <div class="row">
+            <input type="search" id="rental-search" placeholder="Suchen …">
+            <select id="rental-filter">
+              <option value="">Alle</option>
+              <option value="aktiv">aktiv</option>
+              <option value="überfällig">überfällig</option>
+              <option value="reserviert">reserviert</option>
+              <option value="zurückgegeben">zurückgegeben</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Person</th><th>Ski</th><th>Zeitraum</th><th>Preis</th><th>Status</th><th></th></tr></thead>
+          <tbody id="rental-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SKI ================= -->
+  <section id="tab-skis" class="tab">
+    <div class="split">
+      <div>
+        <form id="ski-form" class="panel form">
+          <h2>Ski anlegen</h2>
+          <label>Marke <input name="brand" required placeholder="z.B. Atomic"></label>
+          <label>Modell <input name="model" required placeholder="z.B. Redster S9"></label>
+          <label>Typ <select name="type" required></select></label>
+          <label>Länge (cm) <input name="lengthCm" type="number" min="70" max="220" required value="165"></label>
+          <button class="primary" type="submit">Speichern</button>
+        </form>
+        <div class="panel">
+          <h2>Tarife</h2>
+          <table class="compact">
+            <thead><tr><th>Typ</th><th>pro Stunde</th><th>pro Tag (max.)</th></tr></thead>
+            <tbody id="tariff-table"></tbody>
+          </table>
+          <p class="hint">Angefangene Stunde = volle Stunde. Pro 24 h höchstens der Tagespreis.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Ski-Bestand</h2>
+          <input type="search" id="ski-search" placeholder="Marke, Modell, Typ …">
+        </div>
+        <table>
+          <thead><tr><th>#</th><th>Ski</th><th>Typ</th><th>Länge</th><th>Status</th><th></th></tr></thead>
+          <tbody id="ski-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PERSONEN ================= -->
+  <section id="tab-persons" class="tab">
+    <div class="split">
+      <form id="person-form" class="panel form">
+        <h2>Person anlegen</h2>
+        <div class="row">
+          <label>Vorname <input name="firstName" required></label>
+          <label>Nachname <input name="lastName" required></label>
+        </div>
+        <label>Telefon <input name="phone" type="tel"></label>
+        <label>E-Mail <input name="email" type="email"></label>
+
+        <fieldset>
+          <legend>Ausweis</legend>
+          <label>Typ <select name="docType" required></select></label>
+          <label>Nummer <input name="docNumber" required pattern="[A-Za-z0-9 ]{5,24}" placeholder="z.B. P1234567"></label>
+          <label>Ausweis hochladen (optional)
+            <input name="docFile" type="file" accept="image/jpeg,image/png,application/pdf">
+          </label>
+          <p class="hint">JPG, PNG oder PDF, max. 5 MB</p>
+        </fieldset>
+
+        <button class="primary" type="submit">Speichern</button>
+      </form>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Registrierte Personen</h2>
+          <input type="search" id="person-search" placeholder="Name, Ausweis …">
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Kontakt</th><th>Ausweis</th><th>Datei</th><th></th></tr></thead>
+          <tbody id="person-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<input type="file" id="hidden-upload" accept="image/jpeg,image/png,application/pdf" hidden>
+<script src="app.js"></script>
+</body>
+</html>
